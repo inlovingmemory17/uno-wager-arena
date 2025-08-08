@@ -33,7 +33,6 @@ const Index = () => {
           UNOCASH
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="neon" onClick={() => navigate('/lobby')}>Browse Lobbies</Button>
           <Button variant="hero" size="lg" onClick={() => navigate('/signup')}>Sign Up</Button>
         </div>
       </header>

@@ -15,8 +15,8 @@ const Signup = () => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Demo sign up", description: "Auth will be connected later. Redirecting to lobby…" });
-    setTimeout(() => navigate("/lobby"), 600);
+    toast({ title: "Demo sign up", description: "Auth will be connected later. Redirecting home…" });
+    setTimeout(() => navigate("/"), 600);
   };
 
   return (

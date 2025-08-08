@@ -34,7 +34,7 @@ const LandingAuthForm: React.FC = () => {
     }
 
     toast.success("Signed in");
-    navigate("/lobby");
+    navigate("/");
   };
 
   return (
@@ -58,9 +58,8 @@ const LandingAuthForm: React.FC = () => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-between">
+      <CardFooter className="justify-end">
         <Button variant="ghost" size="sm" onClick={() => navigate("/signup")}>Create account</Button>
-        <Button variant="ghost" size="sm" onClick={() => navigate("/lobby")}>Explore lobbies</Button>
       </CardFooter>
     </Card>
   );
