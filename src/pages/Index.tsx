@@ -1,6 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import LandingAuthForm from "@/components/landing/LandingAuthForm";
+import LeaderboardPanel from "@/components/landing/LeaderboardPanel";
+import DepositPanel from "@/components/landing/DepositPanel";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,33 +44,20 @@ const Index = () => {
             Skill‑Based UNO. Winner takes the <span className="text-primary">wager</span>.
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
-            Queue into 1v1 UNO matches, stake SOL, and outplay your opponent.
+            Fair 1v1 UNO matches with SOL wagers. Sign in to get started.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button variant="hero" size="xl" onClick={() => navigate('/signup')}>Play Now</Button>
-            <Button variant="neon" size="lg" onClick={() => navigate('/lobby')}>View Lobbies</Button>
-          </div>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-card/60 backdrop-blur border-border">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-xl">Instant Matchmaking</h3>
-              <p className="mt-2 text-muted-foreground">Jump into a fair 1v1 with anti-cheat protections and low latency.</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/60 backdrop-blur border-border">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-xl">SOL Wagers</h3>
-              <p className="mt-2 text-muted-foreground">Stake SOL and the winner automatically claims the pot.</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card/60 backdrop-blur border-border">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-xl">Built for Skill</h3>
-              <p className="mt-2 text-muted-foreground">Climb leaderboards and prove your UNO mastery.</p>
-            </CardContent>
-          </Card>
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div className="order-2 md:order-1">
+            <LeaderboardPanel />
+          </div>
+          <div className="order-1 md:order-2">
+            <LandingAuthForm />
+          </div>
+          <div className="order-3 md:order-3">
+            <DepositPanel />
+          </div>
         </div>
       </section>
     </main>
