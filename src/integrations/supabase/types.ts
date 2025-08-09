@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      balances: {
+        Row: {
+          available: number
+          created_at: string
+          locked: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available?: number
+          created_at?: string
+          locked?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available?: number
+          created_at?: string
+          locked?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          player1_id: string
+          player2_id: string | null
+          stake_amount: number
+          status: Database["public"]["Enums"]["match_status"]
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          player1_id: string
+          player2_id?: string | null
+          stake_amount: number
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          player1_id?: string
+          player2_id?: string | null
+          stake_amount?: number
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          match_id: string | null
+          metadata: Json
+          status: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          match_id?: string | null
+          metadata?: Json
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          match_id?: string | null
+          metadata?: Json
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +150,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      match_status: "open" | "in_progress" | "completed" | "cancelled"
+      transaction_status: "pending" | "completed" | "failed"
+      transaction_type:
+        | "deposit"
+        | "withdraw"
+        | "wager_lock"
+        | "wager_release"
+        | "prize"
+        | "refund"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +285,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      match_status: ["open", "in_progress", "completed", "cancelled"],
+      transaction_status: ["pending", "completed", "failed"],
+      transaction_type: [
+        "deposit",
+        "withdraw",
+        "wager_lock",
+        "wager_release",
+        "prize",
+        "refund",
+      ],
+    },
   },
 } as const
