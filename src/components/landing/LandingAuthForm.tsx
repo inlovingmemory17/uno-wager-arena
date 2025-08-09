@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -6,11 +6,19 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const LandingAuthForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn, user } = useAuth();
+
+  // Show user balance or different content if authenticated
+  useEffect(() => {
+    if (user) {
+      // User is signed in, could show balance or different UI
+    }
+  }, [user]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,17 +33,40 @@ const LandingAuthForm: React.FC = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await signIn(email, password);
     setLoading(false);
 
     if (error) {
-      toast.error(error.message);
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("Invalid email or password");
+      } else {
+        toast.error(error.message);
+      }
       return;
     }
 
-    toast.success("Signed in");
-    navigate("/");
+    toast.success("Signed in successfully!");
   };
+
+  // Show different content based on auth state
+  if (user) {
+    return (
+      <Card className="bg-card/60 backdrop-blur border-border">
+        <CardHeader>
+          <CardTitle>Welcome back!</CardTitle>
+          <CardDescription>You're signed in as {user.email}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Ready to start wagering SOL in UNO matches?</p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="hero" className="w-full" onClick={() => navigate("/")}>
+            Start Playing
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-card/60 backdrop-blur border-border">
@@ -59,7 +90,7 @@ const LandingAuthForm: React.FC = () => {
         </form>
       </CardContent>
       <CardFooter className="justify-end">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/signup")}>Create account</Button>
+        <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Create account</Button>
       </CardFooter>
     </Card>
   );

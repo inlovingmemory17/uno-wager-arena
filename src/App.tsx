@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Signup from "./pages/Signup";
+import Auth from "./pages/Auth";
+import { AuthProvider } from "./hooks/useAuth";
 
 
 const queryClient = new QueryClient();
@@ -14,23 +15,26 @@ const queryClient = new QueryClient();
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Helmet>
-          <title>UNO Cash — Skill-Based Crypto Wagering</title>
-          <meta name="description" content="Play UNO head‑to‑head and wager SOL. Secure, instant, skill‑based matches." />
-        </Helmet>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/lobby" element={<Navigate to="/" replace />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Helmet>
+            <title>UNO Cash — Skill-Based Crypto Wagering</title>
+            <meta name="description" content="Play UNO head‑to‑head and wager SOL. Secure, instant, skill‑based matches." />
+          </Helmet>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/signup" element={<Navigate to="/auth" replace />} />
+              <Route path="/lobby" element={<Navigate to="/" replace />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
 );
