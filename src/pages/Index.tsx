@@ -4,6 +4,7 @@ import LandingAuthForm from "@/components/landing/LandingAuthForm";
 import LeaderboardPanel from "@/components/landing/LeaderboardPanel";
 import DepositPanel from "@/components/landing/DepositPanel";
 import QueuePanel from "@/components/matchmaking/QueuePanel";
+import BackgroundUnoMatch from "@/components/landing/BackgroundUnoMatch";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,12 +23,13 @@ const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <main className="min-h-screen bg-background text-foreground bg-grid spotlight">
+    <main className="min-h-screen text-foreground bg-grid spotlight relative overflow-hidden">
       <Helmet>
         <title>UNO Cash — Skill-Based Crypto Wagering</title>
         <meta name="description" content="Head-to-head UNO with SOL wagers. Join skill‑based matches and win the pot." />
         <link rel="canonical" href={canonical} />
       </Helmet>
+      <BackgroundUnoMatch />
 
       <header className="container mx-auto flex items-center justify-between py-6">
         <div className="font-black tracking-tight text-2xl md:text-3xl bg-clip-text text-transparent bg-gradient-to-b from-[hsl(var(--primary))] to-[hsl(var(--primary)/0.6)]">
@@ -56,7 +58,7 @@ const Index = () => {
             <LandingAuthForm />
           </div>
           <div className="order-3 md:order-3 space-y-6">
-            <DepositPanel />
+            <DepositPanel hideConnectWallet />
             <QueuePanel />
           </div>
         </div>

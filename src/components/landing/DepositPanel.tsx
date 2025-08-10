@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-const DepositPanel: React.FC = () => {
+interface DepositPanelProps { hideConnectWallet?: boolean }
+const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
@@ -60,7 +61,9 @@ const DepositPanel: React.FC = () => {
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
-        <Button variant="neon" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
+{!hideConnectWallet && (
+          <Button variant="neon" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
+        )}
         <Button variant="secondary" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
       </CardFooter>
     </Card>
