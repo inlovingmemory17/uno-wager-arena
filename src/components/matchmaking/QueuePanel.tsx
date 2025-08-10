@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -15,7 +13,6 @@ const USD_TO_SOL_MAP: Record<number, number> = {
 };
 
 const QueuePanel: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [usdStake, setUsdStake] = useState<1 | 5 | 10>(1);
   const [isQueueing, setIsQueueing] = useState(false);
@@ -38,79 +35,22 @@ const QueuePanel: React.FC = () => {
     return () => clearInterval(i);
   }, [isQueueing]);
 
-  const lockStake = async (amount: number) => {
-    const { data: bal, error: selErr } = await supabase
-      .from("balances")
-      .select("available, locked")
-      .maybeSingle();
-
-    if (selErr) {
-      toast.error("Failed to read balance");
-      return false;
-    }
-
-    const available = parseFloat(String(bal?.available ?? 0));
-    const locked = parseFloat(String(bal?.locked ?? 0));
-
-    if (available < amount) {
-      toast.error("Insufficient SOL balance");
-      return false;
-    }
-
-    const { error: updErr } = await supabase
-      .from("balances")
-      .update({ available: available - amount, locked: locked + amount })
-      .eq("user_id", user?.id);
-
-    if (updErr) {
-      toast.error("Could not lock stake");
-      return false;
-    }
-
+  const lockStake = async (_amount: number) => {
+    // Test mode: skip balance checks/locking
     return true;
   };
 
   const handleQueue = async () => {
-    if (!user) return navigate("/auth");
     setIsQueueing(true);
-
-    // Lock stake immediately
-    const ok = await lockStake(solStake);
-    if (!ok) {
-      setIsQueueing(false);
-      return;
-    }
-
-    toast.info(`Queued for $${usdStake} match (≈ ${solStake} SOL). Waiting for opponent...`);
-
-    // Optional: create a match row (kept simple for MVP)
-    await supabase.from("matches").insert({
-      stake_amount: solStake,
-      created_by: user.id,
-      player1_id: user.id,
-    });
+    toast.info(`Queued for $${usdStake} match (≈ ${solStake} SOL). Test mode: no SOL required.`);
   };
 
   const handlePlayBot = async () => {
-    if (!user) return navigate("/auth");
     if (!isQueueing) return;
-
-    // Navigate to bot game with stake in SOL and usd for display
     navigate(`/game/bot?stake=${solStake}&usd=${usdStake}`);
   };
 
   const cancelQueue = async () => {
-    // Return locked stake if user cancels before playing
-    const { data: bal } = await supabase.from("balances").select("available, locked").maybeSingle();
-    const available = parseFloat(String(bal?.available ?? 0));
-    const locked = parseFloat(String(bal?.locked ?? 0));
-
-    if (locked >= solStake) {
-      await supabase
-        .from("balances")
-        .update({ available: available + solStake, locked: locked - solStake })
-        .eq("user_id", user?.id);
-    }
     setIsQueueing(false);
     toast("Queue canceled");
   };
@@ -134,7 +74,7 @@ const QueuePanel: React.FC = () => {
           ))}
         </div>
         <p className="text-sm text-muted-foreground">
-          Using SOL balance. Current stake: ~{solStake} SOL
+          Test mode: no SOL required. Current stake: ~{solStake} SOL
         </p>
         {isQueueing && (
           <div className="text-sm text-muted-foreground">Time left: {secondsLeft}s</div>

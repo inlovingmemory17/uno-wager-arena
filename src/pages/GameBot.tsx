@@ -59,7 +59,7 @@ const GameBot: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const stake = parseFloat(q.get("stake") || "0"); // in SOL
+  const stake = parseFloat(q.get("stake") || "0.01"); // in SOL
   const usd = q.get("usd") || "1";
   const rake = useMemo(() => 0.1 * stake, [stake]); // 5% of 2S pot = 0.1*S
 
@@ -73,12 +73,7 @@ const GameBot: React.FC = () => {
   const [isSettling, setIsSettling] = useState(false);
 
   useEffect(() => {
-    if (!user || !stake) {
-      toast.error("Missing stake or not signed in");
-      navigate("/");
-      return;
-    }
-    // Init game
+    // Init game (test mode supported, no auth required)
     const d = buildDeck();
     const start: CardT[] = [];
     while (d.length && d[0].color === "wild") d.push(d.shift()!); // avoid wild first card
@@ -171,7 +166,11 @@ const GameBot: React.FC = () => {
   }, [turn, botAct, isDone]);
 
   const settle = async (winner: "player" | "bot") => {
-    if (!user) return;
+    if (!user) {
+      toast("Test mode: no balance changes");
+      navigate("/");
+      return;
+    }
     setIsSettling(true);
     const { data: bal } = await supabase.from("balances").select("available, locked").maybeSingle();
     const available = parseFloat(String(bal?.available ?? 0));
