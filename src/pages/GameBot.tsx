@@ -154,9 +154,10 @@ const GameBot: React.FC = () => {
   }, [bHand, currentColor, drawCard, isDone, topCard, turn]);
 
   useEffect(() => {
+    if (discard.length === 0) return; // wait until game initialized
     if (pHand.length === 0) setIsDone("player");
     if (bHand.length === 0) setIsDone("bot");
-  }, [pHand.length, bHand.length]);
+  }, [pHand.length, bHand.length, discard.length]);
 
   useEffect(() => {
     if (turn === "bot" && !isDone) {
@@ -221,36 +222,48 @@ const GameBot: React.FC = () => {
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                 {topCard && (
-                  <div className={`inline-block px-4 py-3 rounded-md shadow ${
-                    topCard.color === 'red' ? 'bg-[hsl(var(--destructive)/0.2)]' :
-                    topCard.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.2]' :
-                    topCard.color === 'blue' ? 'bg-[hsl(var(--primary)/0.2)]' :
-                    topCard.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.2]' :
-                    'bg-muted'
-                  } transition-all`}> {topCard.color.toUpperCase()} {String(topCard.value).toUpperCase()} </div>
+                  <div
+                    key={topCard.id}
+                    className={`w-20 h-28 rounded-xl border border-border/60 shadow-md flex items-center justify-center text-sm font-semibold select-none
+                    animate-in slide-in-from-bottom-2 fade-in duration-300
+                    ${
+                      topCard.color === 'red' ? 'bg-[hsl(var(--destructive)/0.2)]' :
+                      topCard.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.2]' :
+                      topCard.color === 'blue' ? 'bg-[hsl(var(--primary)/0.2)]' :
+                      topCard.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.2]' :
+                      'bg-muted'
+                    }`}
+                    aria-label={`Top card ${topCard.color} ${String(topCard.value)}`}
+                  >
+                    <span className="tracking-wide">{topCard.color.toUpperCase()} {String(topCard.value).toUpperCase()}</span>
+                  </div>
                 )}
               </div>
 
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Your hand ({pHand.length}):</div>
                 <div className="flex flex-wrap gap-2">
-                  {pHand.map((c) => (
-                    <button
-                      key={c.id}
-                      disabled={turn !== 'player' || isDone !== null || !playableByPlayer(c)}
-                      onClick={() => playCard(c, 'player')}
-                      className={`px-3 py-2 rounded-md border border-border/60 text-sm transition ${
-                        playableByPlayer(c) && turn === 'player' ? 'hover:scale-105' : 'opacity-50'
-                      } ${
-                        c.color === 'red' ? 'bg-[hsl(var(--destructive)/0.1)]' :
-                        c.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.1]' :
-                        c.color === 'blue' ? 'bg-[hsl(var(--primary)/0.1)]' :
-                        c.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.1]' : 'bg-muted'
-                      }`}
-                    >
-                      {c.color.toUpperCase()} {String(c.value).toUpperCase()}
-                    </button>
-                  ))}
+                  {pHand.map((c) => {
+                    const playable = playableByPlayer(c) && turn === 'player' && !isDone;
+                    return (
+                      <button
+                        key={c.id}
+                        disabled={!playable}
+                        onClick={() => playCard(c, 'player')}
+                        className={`w-16 h-24 rounded-xl border border-border/60 shadow-sm flex items-center justify-center text-sm font-semibold select-none transition-transform
+                        ${playable ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}
+                        ${
+                          c.color === 'red' ? 'bg-[hsl(var(--destructive)/0.15)]' :
+                          c.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.15]' :
+                          c.color === 'blue' ? 'bg-[hsl(var(--primary)/0.15)]' :
+                          c.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.15)]' : 'bg-muted'
+                        }`}
+                        aria-label={`${c.color} ${String(c.value)}`}
+                      >
+                        <span className="tracking-wide">{c.color.toUpperCase()} {String(c.value).toUpperCase()}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -1,11 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const DepositPanel: React.FC = () => {
   const [amount, setAmount] = useState(0.5);
+  const { user } = useAuth();
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) { setBalance(null); return; }
+    (async () => {
+      const { data, error } = await supabase
+        .from('balances')
+        .select('available')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!error) setBalance(parseFloat(String(data?.available ?? 0)));
+    })();
+  }, [user]);
 
   const onConnect = () => {
     toast.info("Wallet connection coming soon");
@@ -22,6 +38,12 @@ const DepositPanel: React.FC = () => {
         <CardDescription>Manage your balance to join wagers.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm">Balance</span>
+          <span className="text-sm text-muted-foreground">
+            {balance !== null ? `${balance.toFixed(4)} SOL` : (user ? "Loading..." : "Sign in to view")}
+          </span>
+        </div>
         <div>
           <label htmlFor="sol-amount" className="text-sm text-muted-foreground">Amount</label>
           <div className="mt-2 flex items-center gap-2">
