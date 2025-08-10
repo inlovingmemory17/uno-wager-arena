@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import LandingAuthForm from "@/components/landing/LandingAuthForm";
 import LeaderboardPanel from "@/components/landing/LeaderboardPanel";
 import DepositPanel from "@/components/landing/DepositPanel";
+import QueuePanel from "@/components/matchmaking/QueuePanel";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -54,8 +55,9 @@ const Index = () => {
           <div className="order-1 md:order-2">
             <LandingAuthForm />
           </div>
-          <div className="order-3 md:order-3">
+          <div className="order-3 md:order-3 space-y-6">
             <DepositPanel />
+            <QueuePanel />
           </div>
         </div>
       </section>
