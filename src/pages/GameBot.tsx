@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import UnoCard from "@/components/game/UnoCard";
 
 // Types
 type Color = "red" | "green" | "blue" | "yellow" | "wild";
@@ -234,20 +235,8 @@ const GameBot: React.FC = () => {
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                 {topCard && (
-                  <div
-                    key={topCard.id}
-                    className={`w-20 h-28 rounded-xl border border-border/60 shadow-md flex items-center justify-center text-sm font-semibold select-none
-                    animate-in slide-in-from-bottom-2 fade-in duration-300
-                    ${
-                      topCard.color === 'red' ? 'bg-[hsl(var(--destructive)/0.2)]' :
-                      topCard.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.2]' :
-                      topCard.color === 'blue' ? 'bg-[hsl(var(--primary)/0.2)]' :
-                      topCard.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.2]' :
-                      'bg-muted'
-                    }`}
-                    aria-label={`Top card ${topCard.color} ${String(topCard.value)}`}
-                  >
-                    <span className="tracking-wide">{topCard.color.toUpperCase()} {String(topCard.value).toUpperCase()}</span>
+                  <div key={topCard.id} className="animate-fade-in">
+                    <UnoCard color={topCard.color as any} value={topCard.value as any} size="md" disabled />
                   </div>
                 )}
               </div>
@@ -258,22 +247,15 @@ const GameBot: React.FC = () => {
                   {pHand.map((c) => {
                     const playable = playableByPlayer(c) && turn === 'player' && !isDone;
                     return (
-                      <button
+                      <UnoCard
                         key={c.id}
+                        color={c.color as any}
+                        value={c.value as any}
+                        size="sm"
+                        playable={playable}
                         disabled={!playable}
                         onClick={() => playCard(c, 'player')}
-                        className={`w-16 h-24 rounded-xl border border-border/60 shadow-sm flex items-center justify-center text-sm font-semibold select-none transition-transform
-                        ${playable ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}
-                        ${
-                          c.color === 'red' ? 'bg-[hsl(var(--destructive)/0.15)]' :
-                          c.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.15]' :
-                          c.color === 'blue' ? 'bg-[hsl(var(--primary)/0.15)]' :
-                          c.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.15]' : 'bg-muted'
-                        }`}
-                        aria-label={`${c.color} ${String(c.value)}`}
-                      >
-                        <span className="tracking-wide">{c.color.toUpperCase()} {String(c.value).toUpperCase()}</span>
-                      </button>
+                      />
                     );
                   })}
                 </div>

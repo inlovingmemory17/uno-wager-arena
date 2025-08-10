@@ -56,6 +56,14 @@ All colors MUST be HSL.
     /* Extras for the theme */
     --grid: 230 10% 14%;
     --brand-glow: 46 95% 55%;
+
+    /* UNO palette (HSL) */
+    --uno-red: 0 85% 50%;
+    --uno-yellow: 48 95% 55%;
+    --uno-green: 140 70% 40%;
+    --uno-blue: 210 85% 50%;
+    --uno-black: 0 0% 0%;
+    --uno-white: 0 0% 100%;
   }
 
   .dark {
