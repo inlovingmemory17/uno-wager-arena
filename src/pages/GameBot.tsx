@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -69,6 +70,7 @@ const GameBot: React.FC = () => {
   const stake = parseFloat(q.get("stake") || "0.01"); // in SOL
   const usd = q.get("usd") || "1";
   const rake = useMemo(() => 0.1 * stake, [stake]); // 5% of 2S pot = 0.1*S
+  const matchId = q.get("matchId") || q.get("match_id") || q.get("id") || undefined;
 
   const [deck, setDeck] = useState<CardT[]>([]);
   const [discard, setDiscard] = useState<CardT[]>([]);
@@ -78,6 +80,7 @@ const GameBot: React.FC = () => {
   const [currentColor, setCurrentColor] = useState<Color>("red");
   const [isDone, setIsDone] = useState<null | "player" | "bot">(null);
   const [isSettling, setIsSettling] = useState(false);
+  const [wildChoice, setWildChoice] = useState<CardT | null>(null);
 
   useEffect(() => {
     // Init game (test mode supported, no auth required)
@@ -118,8 +121,9 @@ const GameBot: React.FC = () => {
 
   const topCard = discard[discard.length - 1];
 
-  const playCard = (card: CardT, by: "player" | "bot") => {
-    const colorToSet: Color = card.color === "wild" ? colors[Math.floor(Math.random()*4)] : card.color;
+  const playCard = (card: CardT, by: "player" | "bot", forcedColor?: Color) => {
+    const colorToSet: Color =
+      card.color === "wild" ? (forcedColor ?? colors[Math.floor(Math.random() * 4)]) : card.color;
     setDiscard((d) => [...d, card]);
     if (by === "player") setPHand((h) => h.filter((c) => c.id !== card.id));
     else setBHand((h) => h.filter((c) => c.id !== card.id));
@@ -223,6 +227,9 @@ const GameBot: React.FC = () => {
             <CardTitle>
               UNO vs Bot — Stake ${usd} (≈ {stake} SOL)
             </CardTitle>
+            {matchId && (
+              <div className="text-xs text-muted-foreground">Match ID: <code className="font-mono">{matchId}</code></div>
+            )}
             <div className="flex items-center gap-2 text-sm text-muted-foreground" aria-live="polite">
               <span className="inline-flex items-center gap-2">
                 <span className={`${turn === 'player' ? 'bg-[hsl(var(--success,140_70%_40%))] pulse' : 'bg-muted-foreground/50'} w-2 h-2 rounded-full`} />
@@ -232,6 +239,15 @@ const GameBot: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-6 place-items-center text-center">
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Bot hand: {bHand.length} cards</div>
+                <div className="flex gap-1 justify-center">
+                  {Array.from({ length: bHand.length }).map((_, i) => (
+                    <div key={i} className="w-6 h-8 bg-muted rounded-sm border border-border/60" />
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                 {topCard && (
@@ -254,23 +270,59 @@ const GameBot: React.FC = () => {
                         size="sm"
                         playable={playable}
                         disabled={!playable}
-                        onClick={() => playCard(c, 'player')}
+                        onClick={() => {
+                          if (c.color === 'wild') {
+                            setWildChoice(c);
+                          } else {
+                            playCard(c, 'player');
+                          }
+                        }}
                       />
                     );
                   })}
                 </div>
               </div>
-
-              <div>
-                <div className="text-sm text-muted-foreground mb-2">Bot hand: {bHand.length} cards</div>
-                <div className="flex gap-1 justify-center">
-                  {Array.from({ length: bHand.length }).map((_, i) => (
-                    <div key={i} className="w-6 h-8 bg-muted rounded-sm border border-border/60" />
-                  ))}
-                </div>
-              </div>
             </div>
           </CardContent>
+          {/* Wild color chooser */}
+          <Dialog open={!!wildChoice} onOpenChange={(open) => { if (!open) setWildChoice(null); }}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Choose a color</DialogTitle>
+              </DialogHeader>
+              <div className="flex items-center justify-center gap-4 py-2">
+                <button
+                  type="button"
+                  aria-label="Choose red"
+                  className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
+                  style={{ background: "hsl(var(--uno-red))" }}
+                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'red'); setWildChoice(null); } }}
+                />
+                <button
+                  type="button"
+                  aria-label="Choose yellow"
+                  className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
+                  style={{ background: "hsl(var(--uno-yellow))" }}
+                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'yellow'); setWildChoice(null); } }}
+                />
+                <button
+                  type="button"
+                  aria-label="Choose green"
+                  className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
+                  style={{ background: "hsl(var(--uno-green))" }}
+                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'green'); setWildChoice(null); } }}
+                />
+                <button
+                  type="button"
+                  aria-label="Choose blue"
+                  className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
+                  style={{ background: "hsl(var(--uno-blue))" }}
+                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'blue'); setWildChoice(null); } }}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <CardFooter className="flex items-center gap-3">
             {!isDone ? (
               <>

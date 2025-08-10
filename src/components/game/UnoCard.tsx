@@ -156,9 +156,9 @@ export const UnoCard: React.FC<UnoCardProps> = ({ color, value, size = "sm", dis
         ) : value === "wild" ? (
           <WildWheel />
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="relative">
             <WildWheel />
-            <span className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">+4</span>
+            <span className="absolute inset-0 flex items-center justify-center text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">+4</span>
           </div>
         )}
       </div>
