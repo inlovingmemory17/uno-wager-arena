@@ -147,7 +147,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_top_wagers: {
+        Args: { limit_count?: number }
+        Returns: {
+          display_name: string
+          amount: number
+          created_at: string
+        }[]
+      }
     }
     Enums: {
       match_status: "open" | "in_progress" | "completed" | "cancelled"

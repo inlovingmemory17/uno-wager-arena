@@ -20,16 +20,22 @@ const uid = () => Math.random().toString(36).slice(2);
 
 function buildDeck(): CardT[] {
   const deck: CardT[] = [];
-  // Number cards: one 0, two 1-9 per color (simplified: one each)
+  // For each color: one 0, two of 1-9, two of each action (skip, reverse, draw2)
   colors.forEach((c) => {
-    for (let n = 0 as NumberValue; n <= 9; n = (n + 1) as NumberValue) {
+    deck.push({ id: uid(), color: c, value: 0 });
+    for (let n = 1 as NumberValue; n <= 9; n = (n + 1) as NumberValue) {
+      deck.push({ id: uid(), color: c, value: n });
       deck.push({ id: uid(), color: c, value: n });
     }
+    // Two of each action per color
+    deck.push({ id: uid(), color: c, value: "skip" });
     deck.push({ id: uid(), color: c, value: "skip" });
     deck.push({ id: uid(), color: c, value: "reverse" });
+    deck.push({ id: uid(), color: c, value: "reverse" });
+    deck.push({ id: uid(), color: c, value: "draw2" });
     deck.push({ id: uid(), color: c, value: "draw2" });
   });
-  // Wilds
+  // Wilds: 4 Wild, 4 Wild Draw Four
   for (let i = 0; i < 4; i++) deck.push({ id: uid(), color: "wild", value: "wild" });
   for (let i = 0; i < 4; i++) deck.push({ id: uid(), color: "wild", value: "wild4" });
   return shuffle(deck);
@@ -216,9 +222,15 @@ const GameBot: React.FC = () => {
             <CardTitle>
               UNO vs Bot — Stake ${usd} (≈ {stake} SOL)
             </CardTitle>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground" aria-live="polite">
+              <span className="inline-flex items-center gap-2">
+                <span className={`${turn === 'player' ? 'bg-[hsl(var(--success,140_70%_40%))] pulse' : 'bg-muted-foreground/50'} w-2 h-2 rounded-full`} />
+                {turn === 'player' ? 'Your turn' : "Bot's turn"}
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-6 place-items-center text-center">
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                 {topCard && (
@@ -241,8 +253,8 @@ const GameBot: React.FC = () => {
               </div>
 
               <div>
-                <div className="text-sm text-muted-foreground mb-2">Your hand ({pHand.length}):</div>
-                <div className="flex flex-wrap gap-2">
+                <div className="text-sm text-muted-foreground mb-2">Your hand ({pHand.length}): {pHand.length === 1 && <span className="ml-2 text-primary font-semibold">UNO!</span>}</div>
+                <div className="flex flex-wrap gap-2 justify-center">
                   {pHand.map((c) => {
                     const playable = playableByPlayer(c) && turn === 'player' && !isDone;
                     return (
@@ -256,7 +268,7 @@ const GameBot: React.FC = () => {
                           c.color === 'red' ? 'bg-[hsl(var(--destructive)/0.15)]' :
                           c.color === 'green' ? 'bg-[hsl(var(--success,140_70%_40%))/0.15]' :
                           c.color === 'blue' ? 'bg-[hsl(var(--primary)/0.15)]' :
-                          c.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.15)]' : 'bg-muted'
+                          c.color === 'yellow' ? 'bg-[hsl(var(--warning,48_95%_53%))/0.15]' : 'bg-muted'
                         }`}
                         aria-label={`${c.color} ${String(c.value)}`}
                       >
@@ -269,7 +281,7 @@ const GameBot: React.FC = () => {
 
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Bot hand: {bHand.length} cards</div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 justify-center">
                   {Array.from({ length: bHand.length }).map((_, i) => (
                     <div key={i} className="w-6 h-8 bg-muted rounded-sm border border-border/60" />
                   ))}
