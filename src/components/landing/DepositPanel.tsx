@@ -59,12 +59,16 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       const treasuryStr = (treasuryData as any)?.treasuryPublicKey as string | undefined;
       if (!treasuryStr) throw new Error("Missing treasury public key");
       const treasury = new web3.PublicKey(treasuryStr);
-
-      const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"), "confirmed");
+ 
+      const { data: bhData, error: bhErr } = await supabase.functions.invoke("get-blockhash");
+      if (bhErr) throw bhErr;
+      const blockhash: string | undefined = (bhData as any)?.blockhash;
+      if (!blockhash) throw new Error("Failed to fetch blockhash");
       const fromPubkey = new web3.PublicKey(publicKey);
       const lamports = Math.round(amount * web3.LAMPORTS_PER_SOL);
 
       const tx = new web3.Transaction({
+        recentBlockhash: blockhash,
         feePayer: fromPubkey,
       }).add(
         web3.SystemProgram.transfer({

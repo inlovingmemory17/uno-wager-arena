@@ -2,3 +2,15 @@ project_id = "lcfpdlspgspfdjqwrbpw"
 
 [functions.treasury-info]
 verify_jwt = false
+
+[functions.deposit-sol-verify]
+verify_jwt = false
+
+[functions.withdraw-sol]
+verify_jwt = false
+
+[functions.devnet-credit-sol]
+verify_jwt = false
+
+[functions.get-blockhash]
+verify_jwt = false
