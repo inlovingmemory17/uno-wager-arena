@@ -17,8 +17,8 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
       if (!authenticated) {
         await login();
       }
-      // Open Privy funding flow; types vary across versions, cast for compatibility
-      await (fundWallet as unknown as (arg?: any) => Promise<void>)({ chain: 'solana' });
+      // Open Privy funding flow; leaving chain undefined for widest SDK compatibility
+      await (fundWallet as unknown as (arg?: any) => Promise<void>)();
       toast.info("Privy deposit opened. Complete the flow and return here.");
 
       // Attempt a balance refresh shortly after
