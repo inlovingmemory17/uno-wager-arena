@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import UnoCard from "@/components/game/UnoCard";
+import { useSound } from "@/hooks/useSound";
 
 // Types
 type Color = "red" | "green" | "blue" | "yellow" | "wild";
@@ -66,6 +67,7 @@ const GameBot: React.FC = () => {
   const q = useQuery();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { playCardPlace, playCardDraw } = useSound();
 
   const stake = parseFloat(q.get("stake") || "0.01"); // in SOL
   const usd = q.get("usd") || "1";
@@ -215,6 +217,7 @@ const GameBot: React.FC = () => {
 
   const onDraw = () => {
     if (turn !== "player" || isDone) return;
+    playCardDraw();
     drawCard(1, pHand, setPHand);
     setTurn("bot");
   };
@@ -338,6 +341,7 @@ const GameBot: React.FC = () => {
                           if (c.color === 'wild') {
                             setWildChoice(c);
                           } else {
+                            playCardPlace();
                             playCard(c, 'player');
                           }
                         }}
@@ -360,28 +364,28 @@ const GameBot: React.FC = () => {
                   aria-label="Choose red"
                   className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
                   style={{ background: "hsl(var(--uno-red))" }}
-                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'red'); setWildChoice(null); } }}
+                  onClick={() => { if (wildChoice) { playCardPlace(); playCard(wildChoice, 'player', 'red'); setWildChoice(null); } }}
                 />
                 <button
                   type="button"
                   aria-label="Choose yellow"
                   className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
                   style={{ background: "hsl(var(--uno-yellow))" }}
-                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'yellow'); setWildChoice(null); } }}
+                  onClick={() => { if (wildChoice) { playCardPlace(); playCard(wildChoice, 'player', 'yellow'); setWildChoice(null); } }}
                 />
                 <button
                   type="button"
                   aria-label="Choose green"
                   className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
                   style={{ background: "hsl(var(--uno-green))" }}
-                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'green'); setWildChoice(null); } }}
+                  onClick={() => { if (wildChoice) { playCardPlace(); playCard(wildChoice, 'player', 'green'); setWildChoice(null); } }}
                 />
                 <button
                   type="button"
                   aria-label="Choose blue"
                   className="w-10 h-10 rounded-full ring-2 ring-white/30 hover:scale-105 transition-transform"
                   style={{ background: "hsl(var(--uno-blue))" }}
-                  onClick={() => { if (wildChoice) { playCard(wildChoice, 'player', 'blue'); setWildChoice(null); } }}
+                  onClick={() => { if (wildChoice) { playCardPlace(); playCard(wildChoice, 'player', 'blue'); setWildChoice(null); } }}
                 />
               </div>
             </DialogContent>

@@ -60,7 +60,7 @@ const LandingAuthForm: React.FC = () => {
           <p className="text-sm text-muted-foreground">Ready to start wagering SOL in UNO matches?</p>
         </CardContent>
         <CardFooter>
-          <Button variant="hero" className="w-full" onClick={() => navigate("/")}>
+          <Button variant="game" className="w-full" onClick={() => navigate("/")}>
             Start Playing
           </Button>
         </CardFooter>
@@ -84,7 +84,7 @@ const LandingAuthForm: React.FC = () => {
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full" disabled={loading} variant="hero">
+          <Button type="submit" className="w-full" disabled={loading} variant="game">
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
