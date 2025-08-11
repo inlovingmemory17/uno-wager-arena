@@ -7,12 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVY_APP_ID } from "@/config/privy";
 import PrivyDepositButton from "@/components/landing/PrivyDepositButton";
+import { useSolPrice } from "@/hooks/useSolPrice";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const privyEnabled = Boolean(PRIVY_APP_ID);
+  const { priceUSD } = useSolPrice();
   useEffect(() => {
     if (!user) { setBalance(null); return; }
     (async () => {
@@ -53,6 +55,37 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
     }
   };
 
+  const onWithdraw = async () => {
+    try {
+      if (!user) return toast.error("Sign in to withdraw");
+      if (balance === null || balance <= 0) return toast.error("No balance to withdraw");
+
+      // Frontend guard for $2 minimum (backend enforces too)
+      if (priceUSD && balance * priceUSD < 2) {
+        return toast.error("You need at least $2 of SOL to withdraw");
+      }
+
+      const destination = window.prompt("Enter your Solana address to receive withdrawal:");
+      if (!destination) return;
+
+      const defaultAmt = Math.max(0, balance - 0.00001);
+      const amtStr = window.prompt("Amount of SOL to withdraw", defaultAmt.toFixed(6)) ?? "";
+      const amountSol = parseFloat(amtStr);
+      if (!Number.isFinite(amountSol) || amountSol <= 0) return toast.error("Invalid amount");
+
+      const { data, error } = await supabase.functions.invoke("withdraw-sol", {
+        body: { destination, amountSol },
+      });
+      if (error) throw error;
+
+      if (typeof data?.available === "number") setBalance(data.available);
+      toast.success(`Withdrawal sent! Tx: ${data?.signature ?? "submitted"}`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? "Withdrawal failed");
+    }
+  };
+
   return (
     <Card className="bg-card/60 backdrop-blur border-border h-full">
       <CardHeader>
@@ -86,12 +119,15 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
         {!hideConnectWallet && (
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
-        {privyEnabled ? (
-          // @ts-ignore loaded only when Privy configured
-          <PrivyDepositButton onBalanceRefresh={(b) => setBalance(b)} />
-        ) : (
-          <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
-        )}
+        <div className="flex w-full sm:w-auto gap-2">
+          {privyEnabled ? (
+            // @ts-ignore loaded only when Privy configured
+            <PrivyDepositButton onBalanceRefresh={(b) => setBalance(b)} />
+          ) : (
+            <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
+          )}
+          <Button variant="game" className="w-full sm:w-auto" onClick={onWithdraw}>Withdraw</Button>
+        </div>
       </CardFooter>
     </Card>
   );
