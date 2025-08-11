@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { PRIVY_APP_ID } from "@/config/privy";
-
 import { useSolPrice } from "@/hooks/useSolPrice";
+import { usePhantom } from "@/hooks/usePhantom";
+import { Connection, clusterApiUrl, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
-  const privyEnabled = Boolean(PRIVY_APP_ID);
   const { priceUSD } = useSolPrice();
+  const { connected, publicKey, connect, disconnect, provider } = usePhantom();
   useEffect(() => {
     if (!user) { setBalance(null); return; }
     (async () => {
@@ -27,12 +27,17 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
     })();
   }, [user]);
 
-  const onConnect = () => {
-    toast.info("Wallet connection coming soon");
+  const onConnect = async () => {
+    try {
+      const ok = await connect();
+      if (ok) toast.success("Phantom connected");
+      else toast.error("Phantom not available");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to connect Phantom");
+    }
   };
 
   const onDeposit = async () => {
-    // Devnet credit fallback
     if (!user) {
       toast.error("Sign in to deposit");
       return;
@@ -42,13 +47,48 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       return;
     }
     try {
-      const { data, error } = await supabase.functions.invoke("devnet-credit-sol", {
-        body: { amount },
+      if (!connected) {
+        const ok = await connect();
+        if (!ok) return toast.error("Phantom not available");
+      }
+      if (!provider || !publicKey) return toast.error("Phantom not connected");
+
+      // Fetch treasury public key from edge function
+      const { data: treasuryData, error: treErr } = await supabase.functions.invoke("treasury-info");
+      if (treErr) throw treErr;
+      const treasuryStr = (treasuryData as any)?.treasuryPublicKey as string | undefined;
+      if (!treasuryStr) throw new Error("Missing treasury public key");
+      const treasury = new PublicKey(treasuryStr);
+
+      const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+      const fromPubkey = new PublicKey(publicKey);
+      const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: fromPubkey,
+      }).add(
+        SystemProgram.transfer({
+          fromPubkey,
+          toPubkey: treasury,
+          lamports,
+        })
+      );
+
+      const signed: any = await (provider as any).signAndSendTransaction(tx);
+      const signature: string = signed?.signature || signed;
+
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+
+      const { data, error } = await supabase.functions.invoke("deposit-sol-verify", {
+        body: { signature },
       });
       if (error) throw error;
-      const newBal = typeof data?.available === "number" ? data.available : (balance ?? 0) + amount;
-      setBalance(newBal);
-      toast.success(`Credited ${amount} SOL on devnet`);
+
+      const newBal = typeof (data as any)?.available === "number" ? (data as any).available : (balance ?? 0) + amount;
+      if (typeof newBal === "number") setBalance(newBal);
+      toast.success(`Deposited ${amount} SOL`);
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message ?? "Deposit failed");
@@ -89,8 +129,8 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   return (
     <Card className="bg-card/60 backdrop-blur border-border h-full">
       <CardHeader>
-        <CardTitle>Deposit SOL (Devnet / Privy)</CardTitle>
-        <CardDescription>Use Privy when available; otherwise devnet credit for testing.</CardDescription>
+        <CardTitle>Deposit SOL (Mainnet via Phantom)</CardTitle>
+        <CardDescription>Connect Phantom and send SOL to our treasury. Instant credit on confirmation.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
@@ -112,7 +152,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
             />
             <span className="text-sm text-muted-foreground">SOL</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Devnet only. Privy opens a funding menu when available; otherwise we credit for testing.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Mainnet only. Your balance updates after on‑chain confirmation.</p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
@@ -120,7 +160,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
         <div className="flex w-full sm:w-auto gap-2">
-            <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
+            <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
           <Button variant="game" className="w-full sm:w-auto" onClick={onWithdraw}>Withdraw</Button>
         </div>
       </CardFooter>
