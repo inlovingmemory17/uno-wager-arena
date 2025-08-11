@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVY_APP_ID } from "@/config/privy";
-import PrivyDepositButton from "@/components/landing/PrivyDepositButton";
+
 import { useSolPrice } from "@/hooks/useSolPrice";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
@@ -120,12 +120,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
         <div className="flex w-full sm:w-auto gap-2">
-          {privyEnabled ? (
-            // @ts-ignore loaded only when Privy configured
-            <PrivyDepositButton onBalanceRefresh={(b) => setBalance(b)} />
-          ) : (
             <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
-          )}
           <Button variant="game" className="w-full sm:w-auto" onClick={onWithdraw}>Withdraw</Button>
         </div>
       </CardFooter>
