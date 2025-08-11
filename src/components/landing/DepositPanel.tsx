@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { usePrivy, useFundWallet } from "@privy-io/react-auth";
+import { PRIVY_APP_ID } from "@/config/privy";
+import PrivyDepositButton from "@/components/landing/PrivyDepositButton";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
-  const { authenticated, login } = usePrivy();
-  const { fundWallet } = useFundWallet();
+  const privyEnabled = Boolean(PRIVY_APP_ID);
   useEffect(() => {
     if (!user) { setBalance(null); return; }
     (async () => {
@@ -30,31 +30,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   };
 
   const onDeposit = async () => {
-    try {
-      // Prefer Privy deposit menu if available
-      if (typeof fundWallet === 'function') {
-        if (!authenticated) {
-          await login();
-        }
-        await fundWallet('default' as any);
-        toast.info("Privy deposit opened. Complete the flow, then we'll refresh your balance.");
-        // Refresh balance after short delay
-        setTimeout(async () => {
-          if (!user) return;
-          const { data } = await supabase
-            .from('balances')
-            .select('available')
-            .eq('user_id', user.id)
-            .maybeSingle();
-          setBalance(parseFloat(String(data?.available ?? balance ?? 0)));
-        }, 4000);
-        return;
-      }
-    } catch (e: any) {
-      console.error("Privy deposit failed or unavailable", e);
-    }
-
-    // Fallback to devnet credit for testing
+    // Devnet credit fallback
     if (!user) {
       toast.error("Sign in to deposit");
       return;
@@ -80,8 +56,8 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   return (
     <Card className="bg-card/60 backdrop-blur border-border h-full">
       <CardHeader>
-        <CardTitle>Deposit SOL (Devnet)</CardTitle>
-        <CardDescription>Use Privy to fund your wallet. For testing, fallback credits are available.</CardDescription>
+        <CardTitle>Deposit SOL (Devnet / Privy)</CardTitle>
+        <CardDescription>Use Privy when available; otherwise devnet credit for testing.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
@@ -110,7 +86,12 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
         {!hideConnectWallet && (
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
-        <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit with Privy</Button>
+        {privyEnabled ? (
+          // @ts-ignore loaded only when Privy configured
+          <PrivyDepositButton onBalanceRefresh={(b) => setBalance(b)} />
+        ) : (
+          <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
+        )}
       </CardFooter>
     </Card>
   );
