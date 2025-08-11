@@ -13,6 +13,7 @@ function Root() {
       embeddedWallets: {
         solana: { createOnLogin: 'users-without-wallets' },
       },
+      solanaClusters: [{ name: 'devnet', rpcUrl: 'https://api.devnet.solana.com' }],
     }}>
       <App />
     </PrivyProvider>

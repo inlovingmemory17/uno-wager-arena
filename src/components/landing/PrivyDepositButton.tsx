@@ -21,6 +21,8 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
       }
       // Use Solana funding with explicit address + cluster to avoid chain-mapping issues
       const address = wallets?.[0]?.address;
+      console.debug("[PrivyDeposit] wallets:", wallets);
+      console.debug("[PrivyDeposit] selected solana address:", address);
       if (!address) {
         toast.error("No Solana wallet found. Enable Solana embedded wallet and relogin.");
         return;
@@ -28,7 +30,8 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
       // Support both signatures: fundWallet(address, opts) and fundWallet({ address, ...opts })
       try {
         await (fundWallet as unknown as (addr: string, opts?: any) => Promise<void>)(address, { cluster: { name: "devnet" } });
-      } catch {
+      } catch (err) {
+        console.warn("[PrivyDeposit] fundWallet two-arg signature failed, retrying with object form", err);
         await (fundWallet as unknown as (opts: any) => Promise<void>)({ address, cluster: { name: "devnet" } });
       }
       toast.info("Privy deposit opened. Complete the flow and return here.");
