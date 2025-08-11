@@ -1,1 +1,4 @@
 project_id = "lcfpdlspgspfdjqwrbpw"
+
+[functions.treasury-info]
+verify_jwt = false
