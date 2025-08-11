@@ -252,10 +252,9 @@ const GameBot: React.FC = () => {
                 </div>
               </div>
 
-              <div className="w-full flex items-start justify-between gap-6">
-                <div className="flex-1" />
-
-                <div className="text-center mx-auto">
+              <div className="w-full grid grid-cols-[1fr_auto_auto] items-start gap-6">
+                {/* Center: Discard pile stays centered */}
+                <div className="col-start-2 justify-self-center text-center">
                   <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                   {topCard && (
                     <div key={topCard.id} className="animate-fade-in">
@@ -264,17 +263,46 @@ const GameBot: React.FC = () => {
                   )}
                 </div>
 
-                <div className="text-center ml-auto" aria-label="Draw pile">
+                {/* Right: Draw pile using our card back design */}
+                <div className="col-start-3 justify-self-end text-center" aria-label="Draw pile">
                   <div className="relative w-20 h-28 select-none">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="absolute w-full h-full rounded-xl border border-border/70 shadow-xl"
-                        style={{
-                          background: "hsl(var(--uno-black))",
-                          transform: `translate(${i}px, ${-i}px) rotate(${i * 0.8}deg)`,
-                        }}
-                      />
+                        className="absolute inset-0"
+                        style={{ transform: `translate(${i}px, ${-i}px) rotate(${i * 0.8}deg)` }}
+                      >
+                        <div className="absolute inset-0 rounded-[0.9rem] shadow-[0_10px_20px_hsl(var(--uno-black)/0.25)]">
+                          <div className="absolute inset-0 rounded-[0.9rem] bg-[hsl(var(--uno-black))]" />
+                          <div className="absolute inset-1 rounded-[0.8rem] bg-[hsl(var(--uno-white))]" />
+                          <div className="absolute inset-2 rounded-[0.7rem] bg-[hsl(var(--uno-black))]" />
+                          {/* Curved diamond frame */}
+                          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 140" aria-hidden>
+                            <g transform="translate(50,70) rotate(-18) translate(-50,-70)">
+                              <rect x="8" y="12" width="84" height="116" rx="38" ry="38" fill="none" stroke="white" strokeOpacity="0.6" strokeWidth="6" />
+                              <rect x="14" y="18" width="72" height="104" rx="34" ry="34" fill="none" stroke="white" strokeOpacity="0.35" strokeWidth="4" />
+                            </g>
+                          </svg>
+                          {/* Center four-color wheel */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div
+                              className="w-10 h-10 rounded-full ring-2 ring-white/90"
+                              style={{
+                                background:
+                                  "conic-gradient(hsl(var(--uno-red)) 0 90deg, hsl(var(--uno-yellow)) 90deg 180deg, hsl(var(--uno-green)) 180deg 270deg, hsl(var(--uno-blue)) 270deg 360deg)",
+                              }}
+                            />
+                          </div>
+                          {/* Gloss highlight */}
+                          <div
+                            className="absolute inset-0 rounded-[0.9rem] pointer-events-none"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.1) 28%, rgba(255,255,255,0) 55%)",
+                            }}
+                          />
+                        </div>
+                      </div>
                     ))}
                     <div className={`absolute inset-0 flex items-center justify-center ${mustDraw ? 'shine-glitter triangle-glow' : ''}`}>
                       <Button
