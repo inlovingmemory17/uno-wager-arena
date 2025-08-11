@@ -25,7 +25,12 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
         toast.error("No Solana wallet found. Enable Solana embedded wallet and relogin.");
         return;
       }
-      await fundWallet(address, { cluster: { name: "devnet" } });
+      // Support both signatures: fundWallet(address, opts) and fundWallet({ address, ...opts })
+      try {
+        await (fundWallet as unknown as (addr: string, opts?: any) => Promise<void>)(address, { cluster: { name: "devnet" } });
+      } catch {
+        await (fundWallet as unknown as (opts: any) => Promise<void>)({ address, cluster: { name: "devnet" } });
+      }
       toast.info("Privy deposit opened. Complete the flow and return here.");
 
       // Attempt a balance refresh shortly after
