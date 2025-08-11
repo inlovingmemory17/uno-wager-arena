@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import UnoCard from "@/components/game/UnoCard";
 import { useSound } from "@/hooks/useSound";
+import { useSolPrice } from "@/hooks/useSolPrice";
 
 // Types
 type Color = "red" | "green" | "blue" | "yellow" | "wild";
@@ -71,6 +72,8 @@ const GameBot: React.FC = () => {
 
   const stake = parseFloat(q.get("stake") || "0.01"); // in SOL
   const usd = q.get("usd") || "1";
+  const { priceUSD } = useSolPrice();
+  const usdCalc = useMemo(() => (priceUSD ? (stake * priceUSD).toFixed(2) : usd), [priceUSD, stake, usd]);
   const rake = useMemo(() => 0.1 * stake, [stake]); // 5% of 2S pot = 0.1*S
   const matchId = q.get("matchId") || q.get("match_id") || q.get("id") || undefined;
 
@@ -232,7 +235,7 @@ const GameBot: React.FC = () => {
         <Card className="bg-card/60 backdrop-blur border-border">
           <CardHeader>
             <CardTitle>
-              UNO vs Bot — Stake ${usd} (≈ {stake} SOL)
+              UNO vs Bot — Stake ${usdCalc} (≈ {stake} SOL)
             </CardTitle>
             {matchId && (
               <div className="text-xs text-muted-foreground">Match ID: <code className="font-mono">{matchId}</code></div>
