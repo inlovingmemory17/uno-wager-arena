@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +13,8 @@ import * as web3 from "@solana/web3.js";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
+  const [devnet, setDevnet] = useState<boolean>(() => localStorage.getItem('useDevnet') === '1');
+  useEffect(() => { localStorage.setItem('useDevnet', devnet ? '1' : '0'); }, [devnet]);
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const { priceUSD } = useSolPrice();
@@ -26,6 +30,12 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       if (!error) setBalance(parseFloat(String(data?.available ?? 0)));
     })();
   }, [user]);
+
+  const pickUSD = (usd: number) => {
+    if (!priceUSD) return toast.error("Price unavailable");
+    const sol = +(((usd * 1.1) / priceUSD).toFixed(6));
+    setAmount(sol);
+  };
 
   const onConnect = async () => {
     try {
@@ -47,6 +57,15 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       return;
     }
     try {
+      if (devnet) {
+        const { data, error } = await supabase.functions.invoke("devnet-credit-sol", {
+          body: { amountSol: amount },
+        });
+        if (error) throw error;
+        if (typeof (data as any)?.available === "number") setBalance((data as any).available);
+        return toast.success(`Devnet credit: ${amount} SOL`);
+      }
+
       if (!connected) {
         const ok = await connect();
         if (!ok) return toast.error("Phantom not available");
@@ -60,7 +79,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       if (!treasuryStr) throw new Error("Missing treasury public key");
       const treasury = new web3.PublicKey(treasuryStr);
  
-      const { data: bhData, error: bhErr } = await supabase.functions.invoke("get-blockhash");
+      const { data: bhData, error: bhErr } = await supabase.functions.invoke("get-blockhash", { body: { network: devnet ? "devnet" : "mainnet" } });
       if (bhErr) throw bhErr;
       const blockhash: string | undefined = (bhData as any)?.blockhash;
       if (!blockhash) throw new Error("Failed to fetch blockhash");
@@ -142,12 +161,17 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   return (
     <Card className="bg-card/60 backdrop-blur border-border h-full">
       <CardHeader>
-        <CardTitle>Deposit SOL (Mainnet via Phantom)</CardTitle>
-        <CardDescription>Connect Phantom and send SOL to our treasury. Instant credit on confirmation.</CardDescription>
+        <CardTitle>Deposit SOL ({devnet ? "Devnet (Test)" : "Mainnet via Phantom"})</CardTitle>
+        <CardDescription>Connect Phantom and send SOL to our treasury, or use devnet test mode. Presets include a 10% fee.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm">Balance</span>
+          <div className="flex items-center gap-2">
+            <Switch id="devnet" checked={devnet} onCheckedChange={setDevnet} />
+            <Label htmlFor="devnet" className="text-xs">
+              {devnet ? "Devnet test mode (no real SOL)" : "Mainnet"}
+            </Label>
+          </div>
           <span className="text-sm text-muted-foreground">
             {balance !== null ? `${balance.toFixed(4)} SOL` : (user ? "Loading..." : "Sign in to view")}
           </span>
@@ -159,13 +183,20 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
               id="sol-amount"
               type="number"
               min={0}
-              step={0.1}
+              step={0.000001}
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value || "0"))}
             />
             <span className="text-sm text-muted-foreground">SOL</span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Mainnet only. Your balance updates after on‑chain confirmation.</p>
+          <div className="mt-2 flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => pickUSD(1)}>$1</Button>
+            <Button size="sm" variant="secondary" onClick={() => pickUSD(5)}>$5</Button>
+            <Button size="sm" variant="secondary" onClick={() => pickUSD(10)}>$10</Button>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {priceUSD ? `Est. charge: ~$${(amount * priceUSD).toFixed(2)} (${devnet ? "devnet" : "mainnet"}) — presets include 10% fee` : "Fetching price..."}
+          </p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">

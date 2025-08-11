@@ -11,7 +11,15 @@ serve(async (req) => {
   }
 
   try {
-    const rpcUrl = Deno.env.get("SOLANA_RPC_URL") || "https://api.mainnet-beta.solana.com";
+    let network: "mainnet" | "devnet" = "mainnet";
+    try {
+      const body = await req.json();
+      if (body?.network === "devnet") network = "devnet";
+    } catch {}
+
+    const rpcUrl = network === "devnet"
+      ? "https://api.devnet.solana.com"
+      : (Deno.env.get("SOLANA_RPC_URL") || "https://api.mainnet-beta.solana.com");
 
     const payload = {
       jsonrpc: "2.0",
