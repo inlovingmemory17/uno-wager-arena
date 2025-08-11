@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -12,7 +11,7 @@ import { useSolPrice } from "@/hooks/useSolPrice";
 import * as web3 from "@solana/web3.js";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
-  const [amount, setAmount] = useState(0.5);
+  const [amount, setAmount] = useState(0);
   const [devnet, setDevnet] = useState<boolean>(() => localStorage.getItem('useDevnet') === '1');
   useEffect(() => { localStorage.setItem('useDevnet', devnet ? '1' : '0'); }, [devnet]);
   const { user } = useAuth();
@@ -177,25 +176,18 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
           </span>
         </div>
         <div>
-          <label htmlFor="sol-amount" className="text-sm text-muted-foreground">Amount</label>
-          <div className="mt-2 flex items-center gap-2">
-            <Input
-              id="sol-amount"
-              type="number"
-              min={0}
-              step={0.000001}
-              value={amount}
-              onChange={(e) => setAmount(parseFloat(e.target.value || "0"))}
-            />
-            <span className="text-sm text-muted-foreground">SOL</span>
-          </div>
-          <div className="mt-2 flex gap-2">
+          <p className="text-sm text-muted-foreground">Select deposit amount (10% fee included)</p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
             <Button size="sm" variant="secondary" onClick={() => pickUSD(1)}>$1</Button>
             <Button size="sm" variant="secondary" onClick={() => pickUSD(5)}>$5</Button>
             <Button size="sm" variant="secondary" onClick={() => pickUSD(10)}>$10</Button>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {priceUSD ? `Est. charge: ~$${(amount * priceUSD).toFixed(2)} (${devnet ? "devnet" : "mainnet"}) — presets include 10% fee` : "Fetching price..."}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {priceUSD ? (
+              amount > 0
+                ? `Selected: ${amount.toFixed(6)} SOL (~$${(amount * priceUSD).toFixed(2)})`
+                : "Choose a preset."
+            ) : "Fetching price..."}
           </p>
         </div>
       </CardContent>
@@ -204,7 +196,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
         <div className="flex w-full sm:w-auto gap-2">
-            <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
+            <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit} disabled={amount <= 0 || !priceUSD}>Deposit</Button>
           <Button variant="game" className="w-full sm:w-auto" onClick={onWithdraw}>Withdraw</Button>
         </div>
       </CardFooter>
