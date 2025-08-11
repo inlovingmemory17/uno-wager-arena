@@ -64,9 +64,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       const fromPubkey = new web3.PublicKey(publicKey);
       const lamports = Math.round(amount * web3.LAMPORTS_PER_SOL);
 
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
       const tx = new web3.Transaction({
-        recentBlockhash: blockhash,
         feePayer: fromPubkey,
       }).add(
         web3.SystemProgram.transfer({
@@ -76,10 +74,9 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
         })
       );
 
+      // Let Phantom handle recentBlockhash + submission via its own RPC
       const signed: any = await (provider as any).signAndSendTransaction(tx);
       const signature: string = signed?.signature || signed;
-
-      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
 
       const { data, error } = await supabase.functions.invoke("deposit-sol-verify", {
         body: { signature },
