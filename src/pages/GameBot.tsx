@@ -15,8 +15,8 @@ const initialHand: { color: UnoColor; value: UnoValue }[] = [
 const initialTopCard: { color: UnoColor; value: UnoValue } = { color: "green" as UnoColor, value: 5 };
 
 export default function GameBot() {
-  const [hand, setHand] = useState(initialHand);
-  const [topCard, setTopCard] = useState(initialTopCard);
+  const [hand, setHand] = useState<{ color: UnoColor; value: UnoValue }[]>(initialHand);
+  const [topCard, setTopCard] = useState<{ color: UnoColor; value: UnoValue }>(initialTopCard);
   const [turn, setTurn] = useState<'player' | 'bot'>('player');
   const [mustDraw, setMustDraw] = useState(false);
 
