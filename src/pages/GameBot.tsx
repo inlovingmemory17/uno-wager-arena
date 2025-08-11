@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/button";
 import { UnoCard, UnoColor, UnoValue } from "@/components/game/UnoCard";
 
 // Mock data for testing
-const initialHand = [
-  { color: "red", value: 3 },
-  { color: "blue", value: 7 },
-  { color: "yellow", value: 2 },
-  { color: "green", value: "skip" },
-  { color: "red", value: 9 },
-  { color: "blue", value: 1 },
-  { color: "yellow", value: "draw2" },
+const initialHand: { color: UnoColor; value: UnoValue }[] = [
+  { color: "red" as UnoColor, value: 3 },
+  { color: "blue" as UnoColor, value: 7 },
+  { color: "yellow" as UnoColor, value: 2 },
+  { color: "green" as UnoColor, value: "skip" as UnoValue },
+  { color: "red" as UnoColor, value: 9 },
+  { color: "blue" as UnoColor, value: 1 },
+  { color: "yellow" as UnoColor, value: "draw2" as UnoValue },
 ];
-const initialTopCard = { color: "green", value: 5 };
+const initialTopCard: { color: UnoColor; value: UnoValue } = { color: "green" as UnoColor, value: 5 };
 
 export default function GameBot() {
   const [hand, setHand] = useState(initialHand);
