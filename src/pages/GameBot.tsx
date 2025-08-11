@@ -304,17 +304,19 @@ const GameBot: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    <div className={`absolute inset-0 flex items-center justify-center ${mustDraw ? 'shine-glitter triangle-glow' : ''}`}>
-                      <Button
-                        variant="hero"
-                        size="lg"
-                        className="relative z-10"
-                        onClick={onDraw}
-                        disabled={turn !== 'player'}
-                        aria-label="Draw a card"
-                      >
-                        Draw
-                      </Button>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className={`relative ${mustDraw ? 'triangle-glow' : ''}`}>
+                        <Button
+                          variant="hero"
+                          size="lg"
+                          className={`relative z-10 ${mustDraw ? 'shine-glitter' : ''}`}
+                          onClick={onDraw}
+                          disabled={turn !== 'player'}
+                          aria-label="Draw a card"
+                        >
+                          Draw
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground mt-2">Draw pile</div>
