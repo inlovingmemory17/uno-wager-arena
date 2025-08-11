@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { usePhantom } from "@/hooks/usePhantom";
 import { useSolPrice } from "@/hooks/useSolPrice";
+import { Connection, clusterApiUrl, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
