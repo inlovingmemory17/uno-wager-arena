@@ -252,9 +252,9 @@ const GameBot: React.FC = () => {
                 </div>
               </div>
 
-              <div className="w-full grid grid-cols-[1fr_auto_auto] items-start gap-6">
-                {/* Center: Discard pile stays centered */}
-                <div className="col-start-2 justify-self-center text-center">
+              <div className="relative w-full">
+                {/* Center: keep discard pile perfectly centered */}
+                <div className="w-fit mx-auto text-center">
                   <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                   {topCard && (
                     <div key={topCard.id} className="animate-fade-in">
@@ -263,8 +263,8 @@ const GameBot: React.FC = () => {
                   )}
                 </div>
 
-                {/* Right: Draw pile using our card back design */}
-                <div className="col-start-3 justify-self-end text-center" aria-label="Draw pile">
+                {/* Right pinned: Draw pile using our UNO back style */}
+                <div className="absolute right-0 top-0 text-center" aria-label="Draw pile">
                   <div className="relative w-20 h-28 select-none">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div
