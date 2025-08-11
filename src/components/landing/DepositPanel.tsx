@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { usePhantom } from "@/hooks/usePhantom";
 import { useSolPrice } from "@/hooks/useSolPrice";
-import { Connection, clusterApiUrl, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import * as web3 from "@solana/web3.js";
 interface DepositPanelProps { hideConnectWallet?: boolean }
 const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
   const [amount, setAmount] = useState(0.5);
@@ -58,18 +58,18 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       if (treErr) throw treErr;
       const treasuryStr = (treasuryData as any)?.treasuryPublicKey as string | undefined;
       if (!treasuryStr) throw new Error("Missing treasury public key");
-      const treasury = new PublicKey(treasuryStr);
+      const treasury = new web3.PublicKey(treasuryStr);
 
-      const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
-      const fromPubkey = new PublicKey(publicKey);
-      const lamports = Math.round(amount * LAMPORTS_PER_SOL);
+      const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"), "confirmed");
+      const fromPubkey = new web3.PublicKey(publicKey);
+      const lamports = Math.round(amount * web3.LAMPORTS_PER_SOL);
 
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      const tx = new Transaction({
+      const tx = new web3.Transaction({
         recentBlockhash: blockhash,
         feePayer: fromPubkey,
       }).add(
-        SystemProgram.transfer({
+        web3.SystemProgram.transfer({
           fromPubkey,
           toPubkey: treasury,
           lamports,
