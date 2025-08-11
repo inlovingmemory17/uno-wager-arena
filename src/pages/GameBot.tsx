@@ -189,12 +189,12 @@ const GameBot: React.FC = () => {
     const locked = parseFloat(String(bal?.locked ?? 0));
 
     if (winner === "player") {
-      const payout = 2 * stake - rake; // 1.9S
+      const payout = 2 * stake; // No house edge on player wins
       const { error } = await supabase
         .from("balances")
         .update({ available: available + payout, locked: Math.max(0, locked - stake) })
         .eq("user_id", user.id);
-      if (error) toast.error("Failed to settle win"); else toast.success(`You won! +${(2*stake - rake).toFixed(4)} SOL (5% house edge)`);
+      if (error) toast.error("Failed to settle win"); else toast.success(`You won! +${(payout).toFixed(4)} SOL`);
     } else {
       const { error } = await supabase
         .from("balances")
@@ -208,17 +208,21 @@ const GameBot: React.FC = () => {
 
   const playableByPlayer = (c: CardT) => topCard && canPlay(c, topCard, currentColor);
 
+  const mustDraw = useMemo(
+    () => turn === 'player' && !isDone && !pHand.some((c) => playableByPlayer(c)),
+    [turn, isDone, pHand, topCard, currentColor]
+  );
+
   const onDraw = () => {
     if (turn !== "player" || isDone) return;
     drawCard(1, pHand, setPHand);
     setTurn("bot");
   };
-
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Helmet>
         <title>UNO vs Bot — Stake Match</title>
-        <meta name="description" content="Play a minimal UNO match against a bot with SOL stakes and a fair 5% house edge." />
+        <meta name="description" content="Play an authentic UNO match against a bot with SOL stakes. Smooth animations and instant settlement." />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
       <section className="container mx-auto px-6 py-8">
@@ -248,13 +252,36 @@ const GameBot: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
-                {topCard && (
-                  <div key={topCard.id} className="animate-fade-in">
-                    <UnoCard color={topCard.color as any} value={topCard.value as any} size="md" disabled />
+              <div className="flex items-start justify-center gap-12">
+                <div className="text-center">
+                  <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
+                  {topCard && (
+                    <div key={topCard.id} className="animate-fade-in">
+                      <UnoCard color={topCard.color as any} value={topCard.value as any} size="md" disabled />
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-center" aria-label="Draw pile">
+                  <div className="relative w-24 h-36 select-none">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute w-full h-full rounded-xl border border-border/70 shadow-xl"
+                        style={{
+                          background: "hsl(var(--uno-black))",
+                          transform: `translate(${i * 2}px, ${-i * 2}px) rotate(${i * 1.2}deg)`,
+                        }}
+                      />
+                    ))}
+                    <div className={`absolute inset-0 flex items-center justify-center ${turn === 'player' ? 'hover-scale' : ''} ${mustDraw ? 'shine-glitter' : ''}`}>
+                      <Button variant="hero" size="lg" onClick={onDraw} disabled={turn !== 'player'} aria-label="Draw a card">
+                        Draw
+                      </Button>
+                    </div>
                   </div>
-                )}
+                  <div className="text-xs text-muted-foreground mt-2">Draw pile</div>
+                </div>
               </div>
 
               <div>
@@ -323,14 +350,9 @@ const GameBot: React.FC = () => {
             </DialogContent>
           </Dialog>
 
-          <CardFooter className="flex items-center gap-3">
+          <CardFooter className="flex items-center justify-between gap-3">
             {!isDone ? (
-              <>
-                <Button variant="secondary" onClick={onDraw} disabled={turn !== 'player'}>
-                  Draw
-                </Button>
-                <div className="text-sm text-muted-foreground">Turn: {turn}</div>
-              </>
+              <div className="text-sm text-muted-foreground">Turn: {turn}</div>
             ) : (
               <div className="flex items-center gap-3">
                 <div className="text-sm">
