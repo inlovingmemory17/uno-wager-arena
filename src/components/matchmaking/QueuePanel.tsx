@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-
+import { useSolPrice } from "@/hooks/useSolPrice";
 // Stake tiers labeled in USD but using SOL balances internally.
 // For MVP we map $1/$5/$10 to fixed SOL stakes. Adjust later if needed.
 const USD_TO_SOL_MAP: Record<number, number> = {
@@ -18,7 +18,11 @@ const QueuePanel: React.FC = () => {
   const [isQueueing, setIsQueueing] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(30);
 
-  const solStake = useMemo(() => USD_TO_SOL_MAP[usdStake], [usdStake]);
+  const { priceUSD } = useSolPrice();
+  const solStake = useMemo(() => {
+    const fallback = USD_TO_SOL_MAP[usdStake];
+    return priceUSD ? parseFloat((usdStake / priceUSD).toFixed(4)) : fallback;
+  }, [priceUSD, usdStake]);
 
   useEffect(() => {
     if (!isQueueing) return;
