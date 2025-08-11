@@ -78,10 +78,12 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
         })
       );
 
-      // Let Phantom handle recentBlockhash + submission via its own RPC
+      // Sign + send via Phantom
       const signed: any = await (provider as any).signAndSendTransaction(tx);
-      const signature: string = signed?.signature || signed;
+      const signature: string | undefined = signed?.signature || (typeof signed === "string" ? signed : undefined);
+      if (!signature) throw new Error("Transaction failed or was rejected");
 
+      // Verify and credit
       const { data, error } = await supabase.functions.invoke("deposit-sol-verify", {
         body: { signature },
       });
@@ -92,7 +94,17 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       toast.success(`Deposited ${amount} SOL`);
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message ?? "Deposit failed");
+      const raw = err?.message || err?.error?.message || String(err);
+      const ctx = (err as any)?.context?.body || (err as any)?.details || '';
+      const full = typeof ctx === 'string' && ctx.length ? `${raw} — ${ctx}` : raw;
+
+      if (/insufficient|not enough|lamports/i.test(full)) {
+        return toast.error("Not enough SOL to cover amount + network fee.");
+      }
+      if (/non-2xx|verify|signature|not confirmed|blockhash|forbidden|403/i.test(full)) {
+        return toast.error("Transaction not confirmed. Top up SOL and try again.");
+      }
+      toast.error(full || "Deposit failed");
     }
   };
 
