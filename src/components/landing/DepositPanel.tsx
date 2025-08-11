@@ -28,14 +28,33 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
     toast.info("Wallet connection coming soon");
   };
 
-  const onDeposit = () => {
-    toast.info(`Deposit of ${amount} SOL coming soon`);
+  const onDeposit = async () => {
+    if (!user) {
+      toast.error("Sign in to deposit");
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    try {
+      const { data, error } = await supabase.functions.invoke("devnet-credit-sol", {
+        body: { amount },
+      });
+      if (error) throw error;
+      const newBal = typeof data?.available === "number" ? data.available : (balance ?? 0) + amount;
+      setBalance(newBal);
+      toast.success(`Credited ${amount} SOL on devnet`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message ?? "Deposit failed");
+    }
   };
 
   return (
     <Card className="bg-card/60 backdrop-blur border-border h-full">
       <CardHeader>
-        <CardTitle>Deposit SOL</CardTitle>
+        <CardTitle>Deposit SOL (Devnet)</CardTitle>
         <CardDescription>Manage your balance to join wagers.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -58,13 +77,14 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
             />
             <span className="text-sm text-muted-foreground">SOL</span>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">Devnet only. Instantly credits your test balance.</p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
-{!hideConnectWallet && (
+        {!hideConnectWallet && (
           <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
-        <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
+        <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit (devnet)</Button>
       </CardFooter>
     </Card>
   );
