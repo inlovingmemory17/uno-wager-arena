@@ -252,8 +252,10 @@ const GameBot: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-start justify-center gap-12">
-                <div className="text-center">
+              <div className="w-full flex items-start justify-between gap-6">
+                <div className="flex-1" />
+
+                <div className="text-center mx-auto">
                   <div className="text-sm text-muted-foreground mb-2">Discard top:</div>
                   {topCard && (
                     <div key={topCard.id} className="animate-fade-in">
@@ -262,20 +264,27 @@ const GameBot: React.FC = () => {
                   )}
                 </div>
 
-                <div className="text-center" aria-label="Draw pile">
-                  <div className="relative w-24 h-36 select-none">
+                <div className="text-center ml-auto" aria-label="Draw pile">
+                  <div className="relative w-20 h-28 select-none">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
                         className="absolute w-full h-full rounded-xl border border-border/70 shadow-xl"
                         style={{
                           background: "hsl(var(--uno-black))",
-                          transform: `translate(${i * 2}px, ${-i * 2}px) rotate(${i * 1.2}deg)`,
+                          transform: `translate(${i}px, ${-i}px) rotate(${i * 0.8}deg)`,
                         }}
                       />
                     ))}
-                    <div className={`absolute inset-0 flex items-center justify-center ${turn === 'player' ? 'hover-scale' : ''} ${mustDraw ? 'shine-glitter' : ''}`}>
-                      <Button variant="hero" size="lg" onClick={onDraw} disabled={turn !== 'player'} aria-label="Draw a card">
+                    <div className={`absolute inset-0 flex items-center justify-center ${mustDraw ? 'shine-glitter triangle-glow' : ''}`}>
+                      <Button
+                        variant="hero"
+                        size="lg"
+                        className="relative z-10"
+                        onClick={onDraw}
+                        disabled={turn !== 'player'}
+                        aria-label="Draw a card"
+                      >
                         Draw
                       </Button>
                     </div>

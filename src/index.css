@@ -155,4 +155,22 @@ All colors MUST be HSL.
     mix-blend-mode: screen;
     pointer-events: none;
   }
+
+  .triangle-glow { position: relative; }
+  .triangle-glow::before {
+    content: "";
+    position: absolute;
+    inset: 10%;
+    border-radius: 0.75rem; /* matches --radius */
+    background: conic-gradient(from 210deg,
+      hsl(var(--uno-red)) 0 25%,
+      hsl(var(--uno-yellow)) 25% 50%,
+      hsl(var(--uno-green)) 50% 75%,
+      hsl(var(--uno-blue)) 75% 100%);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    opacity: 0.35;
+    filter: blur(2px);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
