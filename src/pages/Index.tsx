@@ -7,9 +7,11 @@ import QueuePanel from "@/components/matchmaking/QueuePanel";
 import BackgroundUnoMatch from "@/components/landing/BackgroundUnoMatch";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -59,7 +61,7 @@ const Index = () => {
           </div>
           <div className="order-3 md:order-3 space-y-6">
             <DepositPanel hideConnectWallet />
-            <QueuePanel />
+            {!user && <QueuePanel />}
           </div>
         </div>
       </section>
