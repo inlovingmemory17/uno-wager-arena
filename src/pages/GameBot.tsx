@@ -304,11 +304,11 @@ const GameBot: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    <div className={`absolute inset-0 flex items-center justify-center ${mustDraw ? 'shine-glitter triangle-glow' : ''}`}>
+                    <div className="absolute inset-0 flex items-center justify-center">
                       <Button
                         variant="hero"
                         size="lg"
-                        className="relative z-10"
+                        className={`relative z-10 ${mustDraw ? 'border-2 border-primary ring-2 ring-primary/40 ring-offset-2 ring-offset-background' : ''}`}
                         onClick={onDraw}
                         disabled={turn !== 'player'}
                         aria-label="Draw a card"
