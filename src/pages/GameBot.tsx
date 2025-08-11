@@ -402,7 +402,7 @@ const GameBot: React.FC = () => {
                 <Button variant="game" disabled={isSettling} onClick={() => settle(isDone!)}>
                   Settle match
                 </Button>
-                <Button variant="game" onClick={() => navigate('/')}>Back</Button>
+                
               </div>
             )}
           </CardFooter>
