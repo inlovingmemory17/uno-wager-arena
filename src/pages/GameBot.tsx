@@ -115,14 +115,14 @@ export default function GameBot() {
               <div className="relative">
                 {/* Stack effect with multiple cards */}
                 <div className="absolute -inset-1 rotate-[-3deg]">
-                  <UnoCard color="blue" value={3} size="md" disabled />
+                  <UnoCard color={"blue" as UnoColor} value={3 as UnoValue} size="md" disabled />
                 </div>
                 <div className="absolute -inset-0.5 rotate-[2deg]">
-                  <UnoCard color="green" value={7} size="md" disabled />
+                  <UnoCard color={"green" as UnoColor} value={7 as UnoValue} size="md" disabled />
                 </div>
                 {/* Top card */}
                 <div className="relative">
-                  <UnoCard color={topCard.color} value={topCard.value} size="md" disabled />
+                  <UnoCard color={topCard.color as UnoColor} value={topCard.value as UnoValue} size="md" disabled />
                 </div>
               </div>
               <div className="text-xs text-muted-foreground mt-2 text-center">Discard pile</div>
@@ -153,7 +153,7 @@ export default function GameBot() {
                   <Button
                     variant="hero"
                     size="lg"
-                    className={`relative z-10 ${mustDraw ? 'border-2 border-primary animate-pulse shadow-lg shadow-primary/50' : ''}`}
+                    className={`relative z-10 ${mustDraw ? 'ring-2 ring-primary/70 animate-pulse' : ''}`}
                     onClick={onDraw}
                     disabled={turn !== 'player'}
                     aria-label="Draw a card"
@@ -173,11 +173,11 @@ export default function GameBot() {
               {hand.map((card, index) => (
                 <UnoCard
                   key={index}
-                  color={card.color}
-                  value={card.value}
+                  color={card.color as UnoColor}
+                  value={card.value as UnoValue}
                   size="sm"
                   playable={turn === 'player' && (card.color === topCard.color || card.value === topCard.value)}
-                  onClick={() => onPlayCard(card, index)}
+                  onClick={() => onPlayCard(card as { color: UnoColor; value: UnoValue }, index)}
                 />
               ))}
             </div>
