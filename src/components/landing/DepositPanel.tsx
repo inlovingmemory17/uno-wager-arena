@@ -58,7 +58,7 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
     try {
       if (devnet) {
         const { data, error } = await supabase.functions.invoke("devnet-credit-sol", {
-          body: { amountSol: amount },
+          body: { amount },
         });
         if (error) throw error;
         if (typeof (data as any)?.available === "number") setBalance((data as any).available);
