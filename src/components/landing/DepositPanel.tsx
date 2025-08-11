@@ -62,9 +62,9 @@ const DepositPanel: React.FC<DepositPanelProps> = ({ hideConnectWallet }) => {
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
 {!hideConnectWallet && (
-          <Button variant="neon" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
+          <Button variant="game" className="w-full sm:w-auto" onClick={onConnect}>Connect Wallet</Button>
         )}
-        <Button variant="secondary" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
+        <Button variant="game" className="w-full sm:w-auto" onClick={onDeposit}>Deposit</Button>
       </CardFooter>
     </Card>
   );

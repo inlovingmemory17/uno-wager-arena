@@ -66,7 +66,7 @@ const QueuePanel: React.FC = () => {
           {[1, 5, 10].map((v) => (
             <Button
               key={v}
-              variant={usdStake === v ? "neon" : "secondary"}
+              variant="game"
               onClick={() => !isQueueing && setUsdStake(v as 1 | 5 | 10)}
             >
               ${v}
@@ -82,16 +82,16 @@ const QueuePanel: React.FC = () => {
       </CardContent>
       <CardFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
         {!isQueueing ? (
-          <Button variant="neon" className="w-full sm:w-auto" onClick={handleQueue}>
+          <Button variant="game" className="w-full sm:w-auto" onClick={handleQueue}>
             Queue for ${usdStake}
           </Button>
         ) : (
           <div className="flex w-full gap-2">
-            <Button variant="secondary" className="flex-1" onClick={cancelQueue}>
+            <Button variant="game" className="flex-1" onClick={cancelQueue}>
               Cancel
             </Button>
             <Button
-              variant="neon"
+              variant="game"
               className="flex-1"
               onClick={handlePlayBot}
               disabled={secondsLeft > 0}

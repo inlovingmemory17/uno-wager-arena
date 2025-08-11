@@ -309,7 +309,7 @@ const GameBot: React.FC = () => {
                     ))}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Button
-                        variant="hero"
+                        variant="game"
                         size="lg"
                         className={`relative z-10 ${mustDraw ? 'border-2 border-primary ring-2 ring-primary/40 ring-offset-2 ring-offset-background' : ''}`}
                         onClick={onDraw}
@@ -399,10 +399,10 @@ const GameBot: React.FC = () => {
                 <div className="text-sm">
                   {isDone === 'player' ? 'You win!' : 'Bot wins!'}
                 </div>
-                <Button variant="neon" disabled={isSettling} onClick={() => settle(isDone!)}>
+                <Button variant="game" disabled={isSettling} onClick={() => settle(isDone!)}>
                   Settle match
                 </Button>
-                <Button variant="secondary" onClick={() => navigate('/')}>Back</Button>
+                <Button variant="game" onClick={() => navigate('/')}>Back</Button>
               </div>
             )}
           </CardFooter>

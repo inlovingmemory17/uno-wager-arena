@@ -107,7 +107,7 @@ const Auth = () => {
         <div className="font-black tracking-tight text-2xl md:text-3xl bg-clip-text text-transparent bg-gradient-to-b from-[hsl(var(--primary))] to-[hsl(var(--primary)/0.6)]">
           UNOCASH
         </div>
-        <Button variant="ghost" onClick={() => navigate("/")}>← Back to Home</Button>
+        <Button variant="game" onClick={() => navigate("/")}>← Back to Home</Button>
       </header>
 
       <section className="container mx-auto px-6 py-16">
@@ -134,7 +134,7 @@ const Auth = () => {
                       <Label htmlFor="signin-password">Password</Label>
                       <Input id="signin-password" name="signin-password" type="password" autoComplete="current-password" required />
                     </div>
-                    <Button type="submit" className="w-full" disabled={isSignInLoading} variant="hero">
+                    <Button type="submit" className="w-full" disabled={isSignInLoading} variant="game">
                       {isSignInLoading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
@@ -158,7 +158,7 @@ const Auth = () => {
                       <Label htmlFor="password">Password</Label>
                       <Input id="password" name="password" type="password" placeholder="At least 6 characters" autoComplete="new-password" required />
                     </div>
-                    <Button type="submit" variant="hero" className="w-full" disabled={isSignUpLoading}>
+                    <Button type="submit" variant="game" className="w-full" disabled={isSignUpLoading}>
                       {isSignUpLoading ? "Creating account..." : "Sign Up & Play"}
                     </Button>
                   </form>

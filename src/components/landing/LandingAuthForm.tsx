@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import QueuePanel from "@/components/matchmaking/QueuePanel";
 
 const LandingAuthForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -48,24 +49,8 @@ const LandingAuthForm: React.FC = () => {
     toast.success("Signed in successfully!");
   };
 
-  // Show different content based on auth state
   if (user) {
-    return (
-      <Card className="bg-card/60 backdrop-blur border-border">
-        <CardHeader>
-          <CardTitle>Welcome back!</CardTitle>
-          <CardDescription>You're signed in as {user.email}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Ready to start wagering SOL in UNO matches?</p>
-        </CardContent>
-        <CardFooter>
-          <Button variant="game" className="w-full" onClick={() => navigate("/")}>
-            Start Playing
-          </Button>
-        </CardFooter>
-      </Card>
-    );
+    return <QueuePanel />;
   }
 
   return (
@@ -90,7 +75,7 @@ const LandingAuthForm: React.FC = () => {
         </form>
       </CardContent>
       <CardFooter className="justify-end">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Create account</Button>
+        <Button variant="game" size="sm" onClick={() => navigate("/auth")}>Create account</Button>
       </CardFooter>
     </Card>
   );
