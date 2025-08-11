@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useConnectWallet } from "@privy-io/react-auth";
 import { useFundWallet, useSolanaWallets } from "@privy-io/react-auth/solana";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,6 +13,7 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
   const { authenticated, login } = usePrivy();
   const { fundWallet } = useFundWallet();
   const { wallets } = useSolanaWallets();
+  const { connectWallet } = useConnectWallet();
 
   const handleClick = async () => {
     try {
@@ -24,7 +25,8 @@ const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
       console.debug("[PrivyDeposit] wallets:", wallets);
       console.debug("[PrivyDeposit] selected solana address:", address);
       if (!address) {
-        toast.error("No Solana wallet found. Enable Solana embedded wallet and relogin.");
+        await connectWallet({ walletChainType: 'solana' as any });
+        toast.info("Solana wallet connected (or requested). Tap deposit again.");
         return;
       }
       // Support both signatures: fundWallet(address, opts) and fundWallet({ address, ...opts })
