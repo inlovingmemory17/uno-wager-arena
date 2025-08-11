@@ -10,6 +10,9 @@ function Root() {
   return (
     <PrivyProvider appId={PRIVY_APP_ID} config={{
       appearance: { theme: 'dark' },
+      embeddedWallets: {
+        solana: { createOnLogin: 'users-without-wallets' },
+      },
     }}>
       <App />
     </PrivyProvider>
