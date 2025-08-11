@@ -1,7 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { usePrivy, useFundWallet } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
+import { useFundWallet, useSolanaWallets } from "@privy-io/react-auth/solana";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
@@ -11,14 +12,20 @@ interface Props {
 const PrivyDepositButton: React.FC<Props> = ({ onBalanceRefresh }) => {
   const { authenticated, login } = usePrivy();
   const { fundWallet } = useFundWallet();
+  const { wallets } = useSolanaWallets();
 
   const handleClick = async () => {
     try {
       if (!authenticated) {
         await login();
       }
-      // Open Privy funding flow; leaving chain undefined for widest SDK compatibility
-      await (fundWallet as unknown as (arg?: any) => Promise<void>)();
+      // Use Solana funding with explicit address + cluster to avoid chain-mapping issues
+      const address = wallets?.[0]?.address;
+      if (!address) {
+        toast.error("No Solana wallet found. Enable Solana embedded wallet and relogin.");
+        return;
+      }
+      await fundWallet(address, { cluster: { name: "devnet" } });
       toast.info("Privy deposit opened. Complete the flow and return here.");
 
       // Attempt a balance refresh shortly after
